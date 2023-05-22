@@ -1,0 +1,187 @@
+* {
+    /* Initialize and clear the padding and margin of page elements */
+    padding: 0;
+    margin: 0;
+    /* Box model */
+    box-sizing: border-box;
+  }
+  
+  body {
+    /* Flex layout to vertically and horizontally center the page elements */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Make the page occupy the total height of the browser viewport */
+    height: 100vh;
+    /* Background gradient */
+    background: linear-gradient(#141e30, #243b55);
+  }
+  
+  .login {
+    /* Flex layout to arrange child elements */
+    display: flex;
+    /* Arrange the child elements vertically by changing the flex-direction of the flex container */
+    flex-direction: column;
+    /* Center the child elements horizontally in the cross axis direction */
+    align-items: center;
+    width: 400px;
+    padding: 40px;
+    background-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.4);
+  }
+  
+  .login h2 {
+    color: #fff;
+    margin-bottom: 30px;
+  }
+  
+  .login .login_box {
+    /* Relative positioning */
+    position: relative;
+    width: 100%;
+  }
+  
+  .login .login_box input {
+    /* Clear the default border and outline of input elements */
+    outline: none;
+    border: none;
+    width: 100%;
+    padding: 10px 0;
+    margin-bottom: 30px;
+    color: #fff;
+    font-size: 16px;
+    border-bottom: 1px solid #fff;
+    /* Transparent background color */
+    background-color: transparent;
+  }
+  
+  .login .login_box label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 10px 0;
+    color: #ffffff;
+    /* The default value of this property is "auto". It means that the element can be clicked. But if we set it to "none", the element cannot be clicked, as if it is visible but not usable. */
+    /* This is the difference between the two */
+    pointer-events: none;
+    /* Add a transition */
+    transition: all 0.5s;
+  }
+  
+  /* :focus selector is triggered when the input element gains focus. + is the adjacent sibling selector to select the label adjacent to the input */
+  /* :valid selector checks if the input field content is valid. If it's valid, the following style will be applied. If it's invalid, the style won't be applied. When we initially wrote the layout, we added the "required" attribute to the input field. Let's remove it and see the difference. Without "required", the input value is always considered valid, so the style below will always be applied. However, for the password, if the input value is empty, it is considered invalid since "required" can't be empty. The style below will only be applied when we enter something in the password field */
+  .login .login_box input:focus + label,
+  .login .login_box input:valid + label {
+    top: -20px;
+    color: #03e9f4;
+    font-size: 12px;
+  }
+  
+  .login button {
+    overflow: hidden;
+    position: relative;
+    padding: 10px 20px;
+    color: #03e9f4;
+    /* Remove the underline from a */
+    text-decoration: none;
+    /* Add a transition */
+    transition: all 0.5s;
+  }
+  
+  .login button {
+    overflow: hidden;
+    position: relative;
+    padding: 10px 20px;
+    color: #03e9f4;
+    background-color: rgb(19, 139, 131);
+    border-radius: 20px;
+    /* Remove the underline from a */
+    text-decoration: none;
+    /* Add a transition */
+    transition: all 0.5s;
+  }
+  
+  .login button span {
+    position: absolute;
+  }
+  
+  .login button span:first-child {
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    /* to right means to the right, the same goes for the following */
+    background: linear-gradient(to right, transparent, #03e9f4);
+    /* Animation name duration linear is linear motion and infinite is infinite times */
+    animation: move1 1s linear infinite;
+  }
+  
+  .login button span:nth-child(2) {
+    right: 0;
+    top: -100%;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(transparent, #03e9f4);
+    /* Add a delay of 0.25s */
+    animation: move2 1s linear 0.25s infinite;
+  }
+  
+  .login button span:nth-child(3) {
+    right: -100%;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to left, transparent, #03e9f4);
+    animation: move3 1s linear 0.5s infinite;
+  }
+  
+  .login button span:last-child {
+    left: 0;
+    bottom: -100%;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(#03e9f4, transparent);
+    animation: move4 1s linear 0.75s infinite;
+  }
+  
+  /* Animation */
+  @keyframes move1 {
+    0% {
+      left: -100%;
+    }
+    50%,
+    100% {
+      left: 100%;
+    }
+  }
+  
+  @keyframes move2 {
+    0% {
+      top: -100%;
+    }
+    50%,
+    100% {
+      top: 100%;
+    }
+  }
+  
+  @keyframes move3 {
+    0% {
+      right: -100%;
+    }
+    50%,
+    100% {
+      right: 100%;
+    }
+  }
+  
+  @keyframes move4 {
+    0% {
+      bottom: -100%;
+    }
+    50%,
+    100% {
+      bottom: 100%;
+    }
+  }
+  
