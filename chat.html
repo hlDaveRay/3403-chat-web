@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Flask SocketIO Communication</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap" rel="stylesheet">
+    <style>
+        #chatContainer {
+            height: 400px;
+            width: 100%;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+            padding: 10px;
+        }
+        #chatContent {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        #chatContent li {
+            margin-bottom: 10px;
+        }
+        .sender-message {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 70%;
+        }
+        .receiver-message {
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 70%;
+        }
+        #joinRoom,
+        #SubmitForm {
+            margin-bottom: 20px;
+        }
+        #joinRoom label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        #joinRoom input[type="text"] {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #SubmitForm textarea {
+            width: 100%;
+            height: 80px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+        }
+        #SubmitForm button[type="submit"],
+        #leave_room {
+            background-color: #0026ff;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: background-color 0.3s ease-in-out, transform 0.3s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Added shadow */
+        }
+        #SubmitForm button[type="submit"]:before,
+        #leave_room:before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+        #SubmitForm button[type="submit"]:hover:before,
+        #leave_room:hover:before {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(10);
+        }
+        #SubmitForm button[type="submit"]:hover,
+        #leave_room:hover {
+            background-color: #30ffe0;
+            transform: scale(1.05); /* Added scaling effect on hover */
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            color: #FFF;
+        }
+        h1, h3 {
+            text-align: center;
+            font-weight: lighter;
+        }
+        #chatContainer {
+            margin-top: 50px;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        .sender-message, .receiver-message {
+            color: #FFF;
+            font-weight: lighter;
+        }
+        .sender-message {
+            background-color: #007bff;
+        }
+        .receiver-message {
+            background-color: #f3f3f3;
+            color: #000;
+        }
+        #joinRoom, #SubmitForm {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #joinRoom input[type="text"], #SubmitForm textarea {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #FFF;
+        }
+        #joinRoom input[type="submit"], #SubmitForm button[type="submit"], #leave_room {
+            background-color: #14d8ff;
+            color: #00005b;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Added shadow */
+            transition: transform 0.3s ease-in-out;
+        }
+        #chatContainer {
+            height: 400px;
+            margin-top: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        #chatContent {
+            margin: 0;
+        }
+        .sender-message, .receiver-message {
+            padding: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 70%;
+            font-weight: lighter;
+        }
+        #joinRoom, #SubmitForm {
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        
+        /* Additional futuristic styles */
+        #pageTitle {
+            font-size: 28px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        #chatContainer {
+            overflow-x: hidden;
+        }
+        .custom-button span {
+            position: relative;
+            z-index: 2;
+			text-shadow: 0px 0px 20px rgba(39, 255, 241, 0.5);
+        }
+        .custom-button:before {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: rgba(138, 255, 220, 0.5);
+            opacity: 0;
+            z-index: 1;
+            transition: opacity 0.3s, text-shadow 0.3s;
+        }
+        
+        @keyframes glowing {
+            0% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+                text-shadow: 0 0 10px #0effe3;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+		
+		.custom-button {
+			background-color: #10ecff;
+			color: #00005b;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+    
+        .custom-button:hover {
+			background-color: #a9fffa;
+            transform: scale(1.1);
+        }
+    
+    
+            .custom-button:hover:before {
+                width: 200%;
+                height: 200%;
+				opacity: 1;
+				text-shadow: 0px 0px 20px rgba(6, 147, 255, 1.0);
+            }
+			.custom-button:after {
+			    content: '';
+			    position: absolute;
+			    top: 0;
+			    left: 0;
+			    width: 100%;
+			    height: 100%;
+			    border-radius: 5px;
+			    background: linear-gradient(90deg, transparent, rgba(15, 255, 187, 0.6), transparent);
+			    filter: blur(5px);
+			    opacity: 0.8;
+			    animation: glow 2s infinite;
+			    pointer-events: none;
+			    box-sizing: border-box;
+			}
+			
+			 @keyframes glow {
+			    0% {
+			        background-position: 100% 50%;
+			    }
+			    100% {
+			        background-position: -100% 50%;
+			    }
+			}
+			
+			.custom-button:hover:after {
+			    animation: none;
+			    background: none;
+			}
+			
+        </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <h3>Join Room</h3>
+    <form id="joinRoom" method="POST" action="#">
+        <label>Room Number</label>
+        <input type="text" id="roomNum" value="{{ room_name }}" required>
+        <input type="submit" id="submitRoomNum" value="Submit">
+    </form>
+    <button id="leave_room">Leave</button>
+    
+    <h1>This is Room {{room_number}}</h1>
+    <button class="custom-button" onclick="location.href='http://localhost:8000'">Fantastic Chat</button>
+
+
+
+    <ul id="chatContent">
+        <li>Text</li>
+    </ul>
+    <form id="SubmitForm" method="POST" action="#">
+        <h3>Send Text</h3>
+        <textarea placeholder="Input text" name="msg" id="chatMsg" required></textarea>
+        <button type="submit">Send</button>
+        <button type="button" id="searchButton">Search</button>
+
+    </form>
+
+    <div id="chatContainer">
+        <h3>Join Room</h3>
+        <form id="joinRoom" method="POST" action="#">
+            <label>Room Number</label>
+            <input type="text" id="roomNum" value="{{ room_number }}" required>
+            <input type="submit" id="submitRoomNum" value="Submit">
+        </form>
+        <button id="leave_room">Leave</button>
+        
+        <h1>This is Room {{ room_number }}</h1>
+        <ul id="chatContent">
+            <li>Text</li>
+        </ul>
+        <form id="SubmitForm" method="POST" action="#">
+            <h3>Send Text</h3>
+            <textarea placeholder="Input text" name="msg" id="chatMsg" required></textarea>
+            <button type="submit">Send</button>
+            
+        </form>
+    </div>
+    
+    <script>
+        // get login status
+        var isLoggedIn = false; // Not logged in by default
+
+        // Send a request to the server to check the login status
+        var xhr = new XMLHttpRequest();
+        xhr.open("GET", "/check_login_status", true);
+        xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            // get server response
+            var response = JSON.parse(xhr.responseText);
+            isLoggedIn = response.isLoggedIn;
+
+            // Check login status
+            if (!isLoggedIn) {
+            // Not logged in, jump to login.html
+            window.location.href = 'http://localhost:5000';
+            }
+        }
+        };
+        xhr.send();
+
+        // Get the search button element
+        var searchButton = document.querySelector("#searchButton");
+
+        // Listen to the click event of the search button
+        searchButton.addEventListener("click", function() {
+            // Get the value of the input box
+            var inputText = document.querySelector("#chatMsg").value;
+
+            // Hide chat content without input field
+            var chatContent = document.querySelector("#chatContent");
+            var chatMessages = chatContent.querySelectorAll("li");
+            chatMessages.forEach(function(message) {
+                if (message.textContent.indexOf(inputText) === -1) {
+                    message.style.display = "none";
+                } else {
+                    message.style.display = "block";
+                }
+            });
+        });
+
+        // Get the title element
+        var titleElement = document.querySelector("#pageTitle");
+	
+    // Get form elements and submit buttons
+    var joinRoomForm = document.querySelector("#joinRoom");
+    var submitButton = document.querySelector("#submitRoomNum");
+
+    // Listen for form submit events
+    joinRoomForm.addEventListener("submit", function(event) {
+        event.preventDefault(); // prevent the form's default submit behavior
+
+        // Get the room number entered by the user
+        var roomNumber = document.querySelector("#roomNum").value;
+
+        // Modify page title
+        titleElement.textContent = "This is Room " + roomNumber;
+
+        // Clear the input box
+        document.querySelector("#roomNum").value = "";
+
+        // Return false to ensure no form submission occurs
+        return false;
+    });
+
+        $(document).ready(function() {
+            var socket = io();
+
+            // Hide the chat container initially
+            $('#chatContainer').hide();
+
+            socket.on('connect', function() {
+                socket.send('Client Connected');
+            });
+
+            $('form#SubmitForm').submit(function(event) {
+                socket.emit('sendMsg', {
+                    msg: $('#chatMsg').val(),
+                    room: $('#roomNum').val()
+                });
+                $('#chatMsg').val("");
+                return false;
+            });
+
+            $('form#joinRoom').submit(function(event) {
+                socket.emit('joinRoom', {room: $('#roomNum').val()});
+                return false;
+            });
+
+            $('#leave_room').on('click', function() {
+                socket.emit('leaveRoom', {room: $('#roomNum').val()});
+                console.log("sent");
+
+                // Clear the chat container
+                $('#chatContent').empty();
+                // Show a message indicating leaving the room
+                $('#chatContent').append('<li>' + 'You have left room ' + $('#roomNum').val() + '</li>');
+            });
+
+            socket.on('roomJoined', function(msg, cb) {
+                $('#chatContent').append('<li>' + msg.user + ' has joined room ' + msg.room + '</li>');
+            });
+
+            socket.on('roomLeft', function(msg, cb) {
+                $('#chatContent').append('<li>' + msg.user + ' has left room ' + msg.room + '</li>');
+            });
+
+            socket.on('SendtoAll', function(msg, cb) {
+                $('#chatContent').append('<li>' + msg.user + ': ' + msg.msg + '</li>');
+            });
+
+            socket.on('chat_history_updated', function(chatHistory) {
+                // Clear the chat container
+                $('#chatContent').empty();
+
+                // Update the chat history
+                chatHistory.forEach(function(record) {
+                    var message = record.message;
+                    var sender = record.sender;
+                    $('#chatContent').append('<li>' + sender + ': ' + message + '</li>');
+                });
+            });
+
+            // Get chat history
+            $.get("/get_chat_history", function(data) {
+                // Clear the chat container
+                $('#chatContent').empty();
+
+                // Update the chat history
+                data.chat_history.forEach(function(record) {
+                    var sender = record.sender;
+                    var message = record.message;
+                    $('#chatContent').append('<li>' + sender + ': ' + message + '</li>');
+                });
+            });
+
+            // Handle logic for inputting room number
+            $('#joinRoom').on('submit', function(event) {
+                event.preventDefault();
+                var roomNumber = $('#roomNum').val();
+
+                // Clear the chat container
+                $('#chatContent').empty();
+
+                // Send request to get chat history
+                $.get("/get_chat_history", { room_number: roomNumber }, function(data) {
+                    // Update the chat history
+                    data.chat_history.forEach(function(record) {
+                        var sender = record.sender;
+                        var message = record.message;
+                        $('#chatContent').append('<li>' + sender + ': ' + message + '</li>');
+                    });
+                });
+
+                return false;
+            });
+        });
+        particlesJS("particles-js", {
+	            particles: {
+	                number: {
+	                    value: 80,
+	                    density: {
+	                        enable: true,
+	                        value_area: 800,
+	                    },
+	                },
+	                color: {
+	                    value: "#ffffff",
+	                },
+	                shape: {
+	                    type: "circle",
+	                    stroke: {
+	                        width: 0,
+	                        color: "#000000",
+	                    },
+	                    polygon: {
+	                        nb_sides: 5,
+	                    },
+	                    image: {
+	                        src: "img/github.svg",
+	                        width: 100,
+	                        height: 100,
+	                    },
+	                },
+	                opacity: {
+	                    value: 0.5,
+	                    random: false,
+	                    anim: {
+	                        enable: false,
+	                        speed: 1,
+	                        opacity_min: 0.1,
+	                        sync: false,
+	                    },
+	                },
+	                size: {
+	                    value: 3,
+	                    random: true,
+	                    anim: {
+	                        enable: false,
+	                        speed: 40,
+	                        size_min: 0.1,
+	                        sync: false,
+	                    },
+	                },
+	                line_linked: {
+	                    enable: true,
+	                    distance: 150,
+	                    color: "#ffffff",
+	                    opacity: 0.4,
+	                    width: 1,
+	                },
+	                move: {
+	                    enable: true,
+	                    speed: 6,
+	                    direction: "none",
+	                    random: false,
+	                    straight: false,
+	                    out_mode: "out",
+	                    bounce: false,
+	                    attract: {
+	                        enable: false,
+	                        rotateX: 600,
+	                        rotateY: 1200,
+	                    },
+	                },
+	            },
+	            interactivity: {
+	                detect_on: "canvas",
+	                events: {
+	                    onhover: {
+	                        enable: true,
+	                        mode: "repulse",
+	                    },
+	                    onclick: {
+	                        enable: true,
+	                        mode: "push",
+	                    },
+	                    resize: true,
+	                },
+	                modes: {
+	                    grab: {
+	                        distance: 400,
+	                        line_linked: {
+	                            opacity: 1,
+	                        },
+	                    },
+	                    bubble: {
+	                        distance: 400,
+	                        size: 40,
+	                        duration: 2,
+	                        opacity: 8,
+	                        speed: 3,
+	                    },
+	                    repulse: {
+	                        distance: 200,
+	                        duration: 0.4,
+	                    },
+	                    push: {
+	                        particles_nb: 4,
+	                    },
+	                    remove: {
+	                        particles_nb: 2,
+	                    },
+	                },
+	            },
+	            retina_detect: true,
+	        });
+
+    </script>
+</body>
+</html>
