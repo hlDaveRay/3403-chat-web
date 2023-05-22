@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Login</title>
+  <link rel="stylesheet" href="static/css/style_login.css" />
+  <link rel="stylesheet" href="static/css/index.css" />
+</head>
+<body>
+  <form class="login" method="POST">
+    <h2>User Login</h2>
+    <div class="login_box">
+      <input id="id" type="text" required />
+      <label for="id">ID</label>
+    </div>
+    <div class="login_box">
+      <input id="password" type="password" required="required" />
+      <label for="password">Password (At least 4 digits)</label>
+    </div>
+    <button id="loginBtn">Login
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <button id="registerBtn">Register
+      <span></span>
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </form>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="static/js/script_login.js"></script>
+</body>
+</html>
