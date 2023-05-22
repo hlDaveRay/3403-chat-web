@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ChatGPT Demo</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            color: #fff;
+        }
+		
+		#particles-js {
+		    width: 100%;
+		    height: 100%;
+		    position: fixed;
+		    top: 0;
+		    left: 0;
+		    z-index: -1;
+		}
+		
+        #chatContainer {
+            height: 400px;
+            width: 100%;
+            border: 1px solid #ccc;
+            overflow-y: scroll;
+            padding: 10px;
+            background: rgba(0,0,0,.8);
+            border-radius: 10px;
+        }
+
+        #chatContent {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #chatContent li {
+            margin-bottom: 10px;
+            animation: fadeIn 0.6s;
+        }
+
+        #user-input {
+            width: 100%;
+            height: 80px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            background: rgba(255,255,255,.1);
+            color: #fff;
+        }
+
+        #chat-container button[type="submit"] {
+            background: linear-gradient(90deg, #007bff 0%, #6d2121 100%);
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #chat-container button[type="submit"]:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ffff;
+            animation: colorchange 2s infinite;
+        }
+
+        @keyframes colorchange {
+            0% { color: #00ffff; }
+            50% { color: #007bff; }
+            100% { color: #00ffff; }
+        }
+    </style>
+</head>
+<body>
+    <h1>ChatGPT Demo</h1>
+
+    <div id="chatContainer">
+        <ul id="chatContent"></ul>
+        <input type="text" id="user-input" placeholder="输入消息">
+        <button onclick="sendMessage()">发送</button>
+    </div>
+
+	 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+	 
+    <script>
+		particlesJS('particles-js', {
+		    "particles": {
+				"number": {
+					"value": 80,
+		            "density": {
+		                "enable": true,
+		                "value_area": 800
+		            }
+		        },
+		        "color": {
+		            "value": "#fff"
+		        },
+		        "shape": {
+		            "type": "circle",
+		            "stroke": {
+						"width": 0,
+		                "color": "#000000"
+		            },
+		            "polygon": {
+		                "nb_sides": 5
+		            },
+		            "image": {
+		                "src": "img/github.svg",
+		                "width": 100,
+		                "height": 100
+		            }
+		        },
+		        "opacity": {
+		            "value": 0.5,
+		            "random": true,
+		            "anim": {
+		                "enable": true,
+		                "speed": 1,
+		                "opacity_min": 0.1,
+		                "sync": false
+		            }
+		        },
+		        "size": {
+		            "value": 3,
+		            "random": true,
+		            "anim": {
+		                "enable": false,
+		                "speed": 40,
+		                "size_min": 0.1,
+		                "sync": false
+		            }
+		        },
+		        "line_linked": {
+		            "enable": true,
+		            "distance": 150,
+		            "color": "#ffffff",
+		            "opacity": 0.4,
+		            "width": 1
+		        },
+		        "move": {
+		            "enable": true,
+		            "speed": 6,
+		            "direction": "none",
+		            "random": false,
+		            "straight": false,
+		            "out_mode": "out",
+		            "bounce": false,
+		            "attract": {
+		                "enable": false,
+		                "rotateX": 600,
+		                "rotateY": 1200
+		            }
+		        }
+		    },
+		    "interactivity": {
+		        "detect_on": "canvas",
+		        "events": {
+		            "onhover": {
+		                "enable": true,
+		                "mode": "repulse"
+		            },
+		            "onclick": {
+		                "enable": true,
+		                "mode": "push"
+		            },
+		            "resize": true
+		        },
+		        "modes": {
+		            "grab": {
+		                "distance": 400,
+		                "line_linked": {
+		                    "opacity": 1
+		                }
+		            },
+		            "bubble": {
+		                "distance": 400,
+		                "size": 40,
+		                "duration": 2,
+		                "opacity": 8,
+		                "speed": 3
+		            },
+		            "repulse": {
+		                "distance": 200
+		            },
+		            "push": {
+		                "particles_nb": 4
+		            },
+		            "remove": {
+		                "particles_nb": 2
+		            }
+		        }
+		    },
+		    "retina_detect": true
+		});
+
+        function sendMessage() {
+            var userInput = $('#user-input').val();
+            var message = { 'message': userInput };
+
+            $.ajax({
+                type: 'POST',
+                url: '/chat',
+                data: JSON.stringify(message),
+                contentType: 'application/json',
+                success: function(response) {
+                    var reply = response.response;
+                    $('#chatContent').append('<li><strong>用户：</strong>' + userInput + '</li>');
+                    $('#chatContent').append('<li><strong>ChatGPT：</strong>' + reply + '</li>');
+                    $('#user-input').val('');
+                    scrollToBottom();
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+        }
+
+        function scrollToBottom() {
+            var chatContainer = document.getElementById("chatContainer");
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>
